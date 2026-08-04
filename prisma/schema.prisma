@@ -1,0 +1,128 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String?
+  role      String   @default("admin") // 'admin' | 'employee'
+  createdAt DateTime @default(now())
+  activities Activity[]
+
+  @@map("users")
+}
+
+model Employee {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  phone          String
+  department     String
+  position       String
+  salaryLevel    Int
+  joinDate       DateTime
+  status         String          @default("active") // 'active' | 'inactive' | 'terminated'
+  basicSalary    Float
+  taxRate        Float?
+  allowanceRate  Float?
+  deductionRate  Float?
+  createdAt      DateTime        @default(now())
+  payrollRecords PayrollRecord[]
+  salarySlips    SalarySlip[]
+  attendances    Attendance[]
+
+  @@map("employees")
+}
+
+model PayrollConfig {
+  id            String   @id @default(uuid())
+  companyName   String
+  taxRate       Float    // percentage
+  allowanceRate Float    // percentage
+  deductionRate Float    // percentage
+  currency      String   @default("IDR")
+  bankName      String?
+  bankAccount   String?
+  updatedAt     DateTime @updatedAt
+
+  @@map("payroll_configs")
+}
+
+model PayrollRecord {
+  id           String      @id @default(uuid())
+  employeeId   String
+  employee     Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeName String
+  period       String      // YYYY-MM
+  month        Int
+  year         Int
+  basicSalary  Float
+  allowances   Float
+  deductions   Float
+  tax          Float
+  grossSalary  Float
+  netSalary    Float
+  status       String      @default("draft") // 'draft' | 'approved' | 'paid'
+  notes        String?
+  createdAt    DateTime    @default(now())
+  approvedAt   DateTime?
+  paidAt       DateTime?
+  salarySlip   SalarySlip?
+
+  @@map("payroll_records")
+}
+
+model SalarySlip {
+  id              String        @id @default(uuid())
+  payrollRecordId String        @unique
+  payrollRecord   PayrollRecord @relation(fields: [payrollRecordId], references: [id], onDelete: Cascade)
+  employeeId      String
+  employee        Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeName    String
+  position        String
+  department      String
+  period          String        // YYYY-MM
+  month           Int
+  year            Int
+  basicSalary     Float
+  allowances      Float
+  deductions      Float
+  tax             Float
+  grossSalary     Float
+  netSalary       Float
+  createdAt       DateTime      @default(now())
+
+  @@map("salary_slips")
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  type        String
+  description String
+  timestamp   DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activities")
+}
+
+model Attendance {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeName String
+  email        String
+  date         String   // YYYY-MM-DD
+  type         String   // 'checkin' | 'checkout'
+  time         String   // HH:MM
+  status       String   // 'present' | 'late' | 'sick' | 'leave' | 'absent'
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@map("attendances")
+}

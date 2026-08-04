@@ -1,0 +1,46 @@
+flowchart TD
+    Start([Mulai]) --> InputAuth[/Input Username & Password/]
+    InputAuth --> ValidAuth{Validasi Login?}
+    ValidAuth -- Tidak --> ErrMsg[/Tampilkan Error: User/Password Salah/]
+    ErrMsg --> InputAuth
+    
+    ValidAuth -- Ya --> CheckRole{Cek Role Pengguna}
+
+    %% ALUR KARYAWAN
+    CheckRole -- Role: Karyawan --> MenuKaryawan[/Halaman Dashboard Karyawan/]
+    MenuKaryawan --> PilihMenuEmp{Pilih Fitur}
+    
+    PilihMenuEmp -- Presensi Harian --> InputPresensi[/Input Check-in / Check-out/]
+    InputPresensi --> SimpanPresensi[Simpan Data Presensi ke Database]
+    SimpanPresensi --> SelesaiEmp([Selesai])
+
+    PilihMenuEmp -- Lihat Slip Gaji --> PilihPeriode[/Pilih Periode Penggajian/]
+    PilihPeriode --> TampilSlip[/Tampilkan & Cetak Slip Gaji/]
+    TampilSlip --> SelesaiEmp
+
+    %% ALUR ADMIN
+    CheckRole -- Role: Admin --> MenuAdmin[/Halaman Dashboard Admin/]
+    MenuAdmin --> PilihMenuAdmin{Pilih Operasi Admin}
+
+    %% OPERASI 1: KELOLA MASTER
+    PilihMenuAdmin -- Kelola Master Data --> InputMaster[/Input / Edit Data Karyawan, Dept, Jabatan/]
+    InputMaster --> SimpanMaster[Simpan Data Master ke Database]
+    SimpanMaster --> BackToAdmin[Kembali ke Menu Admin]
+    BackToAdmin --> MenuAdmin
+
+    %% OPERASI 2: PROSES PENGGAJIAN
+    PilihMenuAdmin -- Proses Penggajian Bulanan --> InputPeriodeGaji[/Pilih Periode Penggajian / YYYY-MM/]
+    InputPeriodeGaji --> FetchData[Ambil Data Gaji Pokok & Total Presensi]
+    FetchData --> HitungGaji[Kalkulasi Tunjangan, Potongan, & Gaji Bersih]
+    
+    HitungGaji --> ValidHitung{Simpan Penggajian?}
+    ValidHitung -- Tidak --> CancelPay[Batal Simpan] --> BackToAdmin
+    
+    ValidHitung -- Ya --> SimpanGaji[Simpan Data Penggajian - Status: Draft]
+    SimpanGaji --> ValidApprove{Setujui & Bayar?}
+    
+    ValidApprove -- Belum --> SimpanGaji
+    ValidApprove -- Ya --> UpdateStatus[Ubah Status Penggajian -> Paid]
+    UpdateStatus --> AutoGenSlip[Sistem Otomatis Generate Slip Gaji]
+    AutoGenSlip --> ExportLap[/Cetak Slip & Export Laporan Excel/CSV/]
+    ExportLap --> SelesaiAdmin([Selesai])

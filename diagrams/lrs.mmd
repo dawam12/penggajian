@@ -1,0 +1,103 @@
+erDiagram
+    users ||--o{ activities : "mencatat (1:N)"
+    employees ||--o{ payroll_records : "memiliki (1:N)"
+    employees ||--o{ salary_slips : "menerima (1:N)"
+    employees ||--o{ attendances : "mencatat (1:N)"
+    payroll_records ||--o| salary_slips : "menghasilkan (1:1)"
+
+    users {
+        string id PK "UUID"
+        string email UK "Unique Email"
+        string password "Hashed Password"
+        string role "admin | employee"
+        datetime createdAt "Waktu Dibuat"
+    }
+
+    activities {
+        string id PK "UUID"
+        string userId FK "Foreign Key -> users.id"
+        string type "Jenis Aktivitas"
+        string description "Deskripsi Log"
+        datetime timestamp "Waktu Log"
+    }
+
+    employees {
+        string id PK "UUID"
+        string name "Nama Karyawan"
+        string email UK "Unique Email"
+        string phone "Nomor Telepon"
+        string department "Departemen"
+        string position "Jabatan"
+        int salaryLevel "Golongan Gaji"
+        datetime joinDate "Tanggal Bergabung"
+        string status "active | inactive | terminated"
+        float basicSalary "Gaji Pokok"
+        float taxRate "Persentase Pajak Khusus"
+        float allowanceRate "Persentase Tunjangan Khusus"
+        float deductionRate "Persentase Potongan Khusus"
+        datetime createdAt "Waktu Dibuat"
+    }
+
+    attendances {
+        string id PK "UUID"
+        string employeeId FK "Foreign Key -> employees.id"
+        string employeeName "Nama Karyawan"
+        string email "Email Karyawan"
+        string date "YYYY-MM-DD"
+        string type "checkin | checkout"
+        string time "HH:MM"
+        string status "present | late | sick | leave | absent"
+        string notes "Catatan Presensi"
+        datetime createdAt "Waktu Dibuat"
+    }
+
+    payroll_records {
+        string id PK "UUID"
+        string employeeId FK "Foreign Key -> employees.id"
+        string employeeName "Nama Karyawan"
+        string period "YYYY-MM"
+        int month "Bulan (1-12)"
+        int year "Tahun"
+        float basicSalary "Gaji Pokok"
+        float allowances "Total Tunjangan"
+        float deductions "Total Potongan"
+        float tax "Total Pajak"
+        float grossSalary "Gaji Kotor"
+        float netSalary "Gaji Bersih"
+        string status "draft | approved | paid"
+        string notes "Catatan Gaji"
+        datetime createdAt "Waktu Dibuat"
+        datetime approvedAt "Waktu Disetujui"
+        datetime paidAt "Waktu Dibayar"
+    }
+
+    salary_slips {
+        string id PK "UUID"
+        string payrollRecordId FK, UK "Foreign Key -> payroll_records.id"
+        string employeeId FK "Foreign Key -> employees.id"
+        string employeeName "Nama Karyawan"
+        string position "Jabatan"
+        string department "Departemen"
+        string period "YYYY-MM"
+        int month "Bulan"
+        int year "Tahun"
+        float basicSalary "Gaji Pokok"
+        float allowances "Total Tunjangan"
+        float deductions "Total Potongan"
+        float tax "Total Pajak"
+        float grossSalary "Gaji Kotor"
+        float netSalary "Gaji Bersih"
+        datetime createdAt "Tanggal Penerbitan"
+    }
+
+    payroll_configs {
+        string id PK "UUID"
+        string companyName "Nama Perusahaan"
+        float taxRate "Tarif Pajak Standar (%)"
+        float allowanceRate "Tarif Tunjangan Standar (%)"
+        float deductionRate "Tarif Potongan Standar (%)"
+        string currency "Mata Uang (IDR)"
+        string bankName "Nama Bank"
+        string bankAccount "No Rekening"
+        datetime updatedAt "Terakhir Diubah"
+    }
